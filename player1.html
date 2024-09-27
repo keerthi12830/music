@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000; /* Black background */
+            color: #ffffff; /* White text for readability */
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrolling */
+        }
+
+        .player-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #212121; /* Dark gray for contrast */
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1); /* Soft white shadow */
+            position: relative; /* For pseudo-elements */
+            overflow: hidden; /* Clip animations */
+        }
+
+        .title {
+            color: #ff4081; /* Bright pink for title */
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .search-container {
+            position: relative;
+            width: 50%; /* Smaller width */
+            margin: 0 auto 20px; /* Centered and margin below */
+        }
+
+        #search-bar {
+            width: 100%;
+            padding: 10px 40px 10px 20px; /* Padding for the icon */
+            border: 2px solid #ff4081; /* Pink border */
+            border-radius: 5px;
+            background-color: #424242; /* Darker gray for input */
+            color: #ffffff; /* White text for input */
+            font-size: 1rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            color: #ff4081; /* Pink icon */
+            cursor: pointer; /* Pointer cursor on hover */
+        }
+
+        .song-list {
+            text-align: left;
+            margin-bottom: 20px;
+            max-height: 300px; /* Set a max height for the scrollable area */
+            overflow-y: auto; /* Enable vertical scrolling */
+            padding-right: 10px; /* Prevent scrollbar from covering text */
+        }
+
+        .song-item {
+            padding: 15px;
+            border-bottom: 2px solid #333333; /* Darker gray border */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #303030; /* Slightly lighter gray */
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s; /* Smooth hover effect */
+        }
+
+        .song-item:hover {
+            background-color: #424242; /* Dark gray on hover */
+        }
+
+        .song-item span {
+            flex-grow: 1;
+            padding-right: 10px;
+            color: #ffeb3b; /* Bright yellow for song titles */
+            font-weight: bold;
+        }
+
+        .song-item button {
+            background-color: #ff4081; /* Bright pink buttons */
+            border: none;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin-left: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .song-item button:hover {
+            background-color: #f50057; /* Lighter pink on hover */
+        }
+
+        .now-playing {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #ffeb3b; /* Bright yellow for current song */
+        }
+
+        #favorite-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        #favorite-list li {
+            padding: 10px;
+            background-color: #424242; /* Darker gray for favorite items */
+            margin-bottom: 5px;
+            border-radius: 5px;
+            color: #ffeb3b; /* Bright yellow for favorites */
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between; /* Space between title and button */
+            align-items: center; /* Center align */
+        }
+
+        /* Animation styles */
+        .left-animation, .right-animation {
+            position: absolute;
+            top: 0;
+            width: 50px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1); /* Light overlay */
+            transition: transform 0.5s ease; /* Smooth transition */
+            pointer-events: none; /* Disable interaction */
+        }
+
+        .left-animation {
+            left: -50px; /* Start off-screen */
+            animation: slideInLeft 1s forwards; /* Slide-in effect */
+        }
+
+        .right-animation {
+            right: -50px; /* Start off-screen */
+            animation: slideInRight 1s forwards; /* Slide-in effect */
+        }
+
+        @keyframes slideInLeft {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(50px);
+            }
+        }
+
+        @keyframes slideInRight {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <h1 class="title">CS Player</h1>
+
+        <!-- Side animations -->
+        <div class="left-animation"></div>
+        <div class="right-animation"></div>
+
+        <!-- Smaller Centered Search Bar with Icon -->
+        <div class="search-container">
+            <input type="text" id="search-bar" placeholder="Search for a song...">
+            <span class="search-icon" onclick="searchGoogle()">🔍</span>
+        </div>
+
+        <!-- Song List -->
+        <div class="song-list" id="song-list">
+            <!-- Placeholder for song items -->
+        </div>
+
+        <!-- Now Playing -->
+        <div class="now-playing">
+            <p id="now-playing-text">Now Playing: None</p>
+            <audio id="audio-player" controls></audio>
+        </div>
+
+        <!-- Favorite List -->
+        <h2>Your Favorite Songs</h2>
+        <ul id="favorite-list"></ul>
+    </div>
+
+    <script>
+        // Song List Data with online links
+        const songs = [
+            { title: "Shape of You - Ed Sheeran", url: "C:\\Users\\keert\\Downloads\\Shape-of-You-(Slowed-Reverb)(PagalWorldl).mp3"},
+            { title: "Baby", url:"C:\\Users\\keert\\Downloads\\Baby(PagalWorld.com.so).mp3" },
+            { title: "Raabta", url:"C:\\Users\\keert\\Downloads\\Raabta_-_Agent_Vinod_128_Kbps.mp3" },
+            { title: "Chuttamalle", url:"C:\\Users\\keert\\Downloads\\Chuttamalle.mp3" },
+            { title: "Satisfya" , url:"C:\\Users\\keert\\Downloads\\Satisfya(PaglaSongs).mp3" },
+            { title: "Tauba Tauba", url:"C:\\Users\\keert\\Downloads\\128-Tauba Tauba - Bad Newz 128 Kbps.mp3" },
+			{ title: "Gasoina Mix" , url:"C:\Users\keert\Downloads\nea9bf866d98db73eb0909fa9c1cc1b11-d6e9b4e7d2aa3876ad11d771f760ecc5.mp3" },
+			{ title: "Despacito(Hindi vesion)", url:"C:\Users\keert\Downloads\Despacito-(Hindi-Version)(PagalWorldl).mp3" },
+			{ title: "Safari", url:"C:\Users\keert\Downloads\Safari(PaglaSongs).mp3" },
+			{ title: "Pehala nasha", url:"C:\Users\keert\Downloads\Pehla_Nasha_-_Jo_Jeeta_Wohi_Sikandar_128_Kbps.mp3" },
+			{ title: "channa mereya", url:"C:\Users\keert\Downloads\pagalworld.com.mx-Channa Mereya.mp3" },
+			{ title: "Hamdard", url:"C:\Users\keert\Downloads\128-Humdard - Ek Villain 128 Kbps.mp3" },
+			{ title: "Akhiyan gulab", url:"C:\Users\keert\Downloads\Akhiyan Gulab(PagalWorld.com.tw).mp3" },
+			{ title: "bad guy", url: "C:\Users\keert\Downloads\Bad-Guy-(DG)(PagalWorldl).mp3" },
+			{ title: "tum hi ho", url:"C:\Users\keert\Downloads\Tum_Hi_Ho_-_Aashiqui_2_128_Kbps.mp3" },
+			{ title: "dil diyaan gallan", url:"C:\Users\keert\Downloads\Dil_Diyan_Gallan_-_Tiger_Zinda_Hai_128_Kbps.mp3" },
+        ];
+
+        const songList = document.getElementById('song-list');
+        const audioPlayer = document.getElementById('audio-player');
+        const nowPlayingText = document.getElementById('now-playing-text');
+        const favoriteList = document.getElementById('favorite-list');
+
+        function loadSongs() {
+            songList.innerHTML = '';
+            songs.forEach((song, index) => {
+                const songItem = document.createElement('div');
+                songItem.classList.add('song-item');
+
+                songItem.innerHTML = `
+                    <span>${song.title}</span>
+                    <button onclick="playSong(${index})">Play</button>
+                    <button onclick="addToFavorites('${song.title}', '${song.url}')">Add to Favorites</button>
+                `;
+
+                songList.appendChild(songItem);
+            });
+        }
+
+        function playSong(index) {
+            const song = songs[index];
+            audioPlayer.src = song.url;
+            audioPlayer.play();
+            nowPlayingText.textContent = `Now Playing: ${song.title}`;
+        }
+
+        function addToFavorites(title, url) {
+            // Check if the song is already in favorites
+            const favoriteItems = Array.from(favoriteList.children);
+            const existingFavorite = favoriteItems.find(item => item.textContent.includes(title));
+
+            if (existingFavorite) {
+                // Remove from favorites
+                favoriteList.removeChild(existingFavorite);
+            } else {
+                // Add to favorites
+                const favoriteItem = document.createElement('li');
+                favoriteItem.innerHTML = `
+                    ${title}
+                    <button onclick="removeFromFavorites(this)">Remove</button>
+                `;
+                favoriteList.appendChild(favoriteItem);
+            }
+        }
+
+        function removeFromFavorites(button) {
+            // Remove the corresponding favorite item
+            const favoriteItem = button.parentElement;
+            favoriteList.removeChild(favoriteItem);
+        }
+
+        function searchGoogle() {
+            const searchQuery = document.getElementById('search-bar').value;
+            if (searchQuery) {
+                // Open a Google search for the song
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(searchQuery + ' song')}`, '_blank');
+            }
+        }
+
+        // Initialize song list on page load
+        loadSongs();
+    </script>
+</body>
+</html>
